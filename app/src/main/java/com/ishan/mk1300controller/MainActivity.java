@@ -18,6 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                             setupUsbEndpoint(device);
                         }
                     } else {
-                        Toast.makeText(context, "USB Permission Denied", Toast.LENGTH_SHORT).show();
+                        sendUiStatus("PERMISSION DENIED BY USER");
                     }
                 }
             }
@@ -70,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void sendUiStatus(String msg) {
+        runOnUiThread(() -> {
+            webView.evaluateJavascript("if(window.updateStatus) window.updateStatus('" + msg + "');", null);
+        });
+    }
+
     private void setupUsbEndpoint(UsbDevice device) {
         targetDevice = device;
         for (int i = 0; i < device.getInterfaceCount(); i++) {
@@ -81,35 +88,58 @@ public class MainActivity extends AppCompatActivity {
                     if (ep.getDirection() == UsbConstants.USB_DIR_OUT) {
                         outEndpoint = ep;
                         runOnUiThread(() -> webView.evaluateJavascript("if(window.onUsbConnected) window.onUsbConnected();", null));
-                        Toast.makeText(this, "MK1300 Uplink Established!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Hardware Linked!", Toast.LENGTH_SHORT).show();
                         return;
                     }
                 }
+                // Fallback to control transfer if no bulk out found
+                runOnUiThread(() -> webView.evaluateJavascript("if(window.onUsbConnected) window.onUsbConnected();", null));
+                return;
             }
         }
+        sendUiStatus("FAILED TO CLAIM INTERFACE");
     }
 
     public class WebAppInterface {
         @JavascriptInterface
         public void requestDevice() {
             HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
-            for (UsbDevice device : deviceList.values()) {
-                // Universal match: vendor 0x36ae or 0x3151
-                if (device.getVendorId() == 0x36ae || device.getVendorId() == 0x3151) {
-                    int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0;
-                    PendingIntent permissionIntent = PendingIntent.getBroadcast(MainActivity.this, 0, new Intent(ACTION_USB_PERMISSION), flags);
-                    usbManager.requestPermission(device, permissionIntent);
-                    return;
+            
+            if (deviceList.isEmpty()) {
+                sendUiStatus("NO USB DEVICE DETECTED. CHECK OTG.");
+                return;
+            }
+
+            Collection<UsbDevice> devices = deviceList.values();
+            UsbDevice selectedDevice = null;
+
+            // Look for known VIDs first, or pick the first connected USB peripheral
+            for (UsbDevice device : devices) {
+                if (device.getVendorId() == 0x36ae || device.getVendorId() == 0x3151 || device.getVendorId() == 0x258a) {
+                    selectedDevice = device;
+                    break;
                 }
             }
-            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Keyboard not detected via OTG", Toast.LENGTH_SHORT).show());
+
+            // Fallback: If not specifically in list, grab whatever USB device is attached!
+            if (selectedDevice == null && !devices.isEmpty()) {
+                selectedDevice = devices.iterator().next();
+            }
+
+            if (selectedDevice != null) {
+                String devInfo = "Found VID: 0x" + Integer.toHexString(selectedDevice.getVendorId());
+                sendUiStatus("Requesting access: " + devInfo);
+                
+                int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0;
+                PendingIntent permissionIntent = PendingIntent.getBroadcast(MainActivity.this, 0, new Intent(ACTION_USB_PERMISSION), flags);
+                usbManager.requestPermission(selectedDevice, permissionIntent);
+            }
         }
 
         @JavascriptInterface
         public void sendRawReport(String hexString) {
             if (connection == null) return;
-
-            // Parse hex string to bytes
+            
             int len = hexString.length();
             byte[] data = new byte[len / 2];
             for (int i = 0; i < len; i += 2) {
@@ -117,11 +147,10 @@ public class MainActivity extends AppCompatActivity {
                                      + Character.digit(hexString.charAt(i+1), 16));
             }
 
-            // 1. Try Interrupt endpoint transfer
             if (outEndpoint != null) {
                 connection.bulkTransfer(outEndpoint, data, data.length, 100);
             } else {
-                // 2. Fallback to Control Transfer (Standard HID set_report)
+                // HID Set_Report Control Transfer
                 connection.controlTransfer(0x21, 0x09, 0x0300, 0, data, data.length, 100);
             }
         }
@@ -130,7 +159,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(usbReceiver);
+        try {
+            unregisterReceiver(usbReceiver);
+        } catch (Exception ignored) {}
         if (connection != null) connection.close();
     }
 }
