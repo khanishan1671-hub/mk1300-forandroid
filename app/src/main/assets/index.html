@@ -62,6 +62,11 @@
       cursor: pointer;
       text-transform: uppercase;
       box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+      transition: all 0.2s ease;
+    }
+    .btn-connect:active {
+      transform: scale(0.98);
+      background: rgba(0, 243, 255, 0.2);
     }
     #status {
       font-size: 0.85rem;
@@ -69,6 +74,8 @@
       color: #ef4444;
       font-weight: 700;
       letter-spacing: 1px;
+      text-align: center;
+      min-height: 1.2rem;
     }
     .controls {
       width: 100%;
@@ -249,10 +256,21 @@
     speedRange.addEventListener('input', pushToAndroid);
 
     btnConnect.addEventListener('click', () => {
+      statusText.textContent = "Scanning for USB OTG...";
+      statusText.style.color = '#ffaa00';
       if (window.AndroidBridge && window.AndroidBridge.requestDevice) {
         window.AndroidBridge.requestDevice();
+      } else {
+        statusText.textContent = "AndroidBridge not found";
+        statusText.style.color = '#ef4444';
       }
     });
+
+    // Called from Java to update diagnostic info live
+    window.updateStatus = function(msg) {
+      statusText.textContent = msg;
+      statusText.style.color = '#ffaa00';
+    };
 
     // Called from Java once permissions pass
     window.onUsbConnected = function() {
