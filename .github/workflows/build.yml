@@ -19,9 +19,11 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    # THIS IS THE MISSING PIECE: Installs the Android SDK
+    # The fix: packages: '' stops it from trying to install the missing 'tools' package
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        packages: ''
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
@@ -29,8 +31,7 @@ jobs:
         gradle-version: 8.5
 
     - name: Build Debug APK
-      # Adding --info will give us a massive log if it fails again
-      run: gradle assembleDebug --stacktrace --info
+      run: gradle assembleDebug --stacktrace
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
