@@ -3,205 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Ishan's MK1300 Mobile Engine</title>
+  <title>Gaming With Ishan - MK1300 Engine</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+
   <style>
     :root {
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff00ff;
-      --bg: #030613;
+      --neon-purple: #8a2be2;
+      --bg-deep: #03050a;
+      --glass-bg: rgba(8, 12, 24, 0.85);
+      --glass-border: rgba(0, 243, 255, 0.2);
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
+      padding: 10px;
       min-height: 100vh;
-      background: radial-gradient(circle at 50% 0%, #15092a 0%, var(--bg) 75%);
+      background: #000;
       font-family: 'Rajdhani', sans-serif;
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 1.5rem 1rem;
-      user-select: none;
-      -webkit-user-select: none;
+      overflow-x: hidden;
     }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    }
+
     .brand-title {
       font-family: 'Orbitron', sans-serif;
       font-weight: 900;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       margin: 0;
       background: linear-gradient(to right, var(--neon-cyan), var(--neon-magenta));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-align: center;
-      letter-spacing: 2px;
     }
+
     .sub-title {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: #a5b4fc;
       text-align: center;
       letter-spacing: 3px;
-      margin-bottom: 1.2rem;
       text-transform: uppercase;
+      margin-bottom: 0.8rem;
     }
+
     .btn-connect {
-      width: 100%;
-      max-width: 380px;
-      background: rgba(0, 243, 255, 0.08);
+      background: rgba(0, 0, 0, 0.6);
       color: var(--neon-cyan);
       font-family: 'Orbitron', sans-serif;
       font-weight: 700;
-      font-size: 0.95rem;
-      letter-spacing: 1px;
+      font-size: 0.9rem;
       border: 1px solid var(--neon-cyan);
-      border-radius: 12px;
-      padding: 1rem;
+      border-radius: 8px;
+      padding: 0.8rem;
       cursor: pointer;
       text-transform: uppercase;
-      box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
-      transition: all 0.2s ease;
-    }
-    .btn-connect:active {
-      transform: scale(0.98);
-      background: rgba(0, 243, 255, 0.2);
-    }
-    #status {
-      font-size: 0.85rem;
-      margin: 0.8rem 0;
-      color: #ef4444;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-align: center;
-      min-height: 1.2rem;
-    }
-    .controls {
       width: 100%;
-      max-width: 380px;
+    }
+
+    #status {
+      font-family: 'Share Tech Mono', monospace;
+      color: #ef4444;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .controls-grid {
       display: flex;
       flex-direction: column;
-      gap: 1.2rem;
-      opacity: 0.35;
+      gap: 0.9rem;
+      opacity: 0.25;
       pointer-events: none;
       transition: opacity 0.3s;
+      margin-top: 1rem;
     }
-    .controls.active {
-      opacity: 1;
-      pointer-events: all;
+    .controls-grid.active { opacity: 1; pointer-events: all; }
+
+    .wheel-wrapper {
+      margin: 0 auto;
+      padding: 0.5rem;
     }
-    .wheel-container {
-      display: flex;
-      justify-content: center;
-      margin: 0.5rem 0;
-    }
-    .row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-    label {
-      font-size: 0.85rem;
+
+    .control-row label {
+      display: block;
+      font-size: 0.8rem;
       color: var(--neon-cyan);
-      letter-spacing: 1px;
+      margin-bottom: 0.2rem;
       text-transform: uppercase;
     }
+
+    select, input[type=range] { width: 100%; }
     select {
-      background: rgba(10, 15, 30, 0.8);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0, 0, 0, 0.6);
       color: #fff;
-      padding: 0.75rem;
-      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.6rem;
+      border-radius: 6px;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 1rem;
-      outline: none;
+      font-size: 0.95rem;
     }
-    select option { background: #070c1a; }
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      background: transparent;
-      padding: 8px 0;
-    }
+
+    input[type=range] { -webkit-appearance: none; background: transparent; }
     input[type=range]::-webkit-slider-runnable-track {
-      height: 6px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 4px;
+      height: 4px; background: rgba(255,255,255,0.15); border-radius: 4px;
     }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
+      height: 18px; width: 18px; border-radius: 50%;
       background: var(--neon-magenta);
-      margin-top: -7px;
-      box-shadow: 0 0 10px var(--neon-magenta);
+      -webkit-appearance: none; margin-top: -7px;
     }
+
+    .terminal {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(0, 243, 255, 0.15);
+      border-radius: 8px;
+      padding: 0.8rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--neon-cyan);
+      height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .log-line { margin: 0; }
+    .log-line.glitch { color: var(--neon-magenta); }
+    .log-line.success { color: #4ade80; }
   </style>
 </head>
 <body>
 
-  <h1 class="brand-title">GAMING UNLIMITED</h1>
-  <div class="sub-title">Ishan's MK1300 Engine</div>
+  <div class="container">
+    <div class="panel">
+      <h1 class="brand-title">GAMING WITH ISHAN</h1>
+      <div class="sub-title">MK1300 OTG Engine</div>
 
-  <button id="btnConnect" class="btn-connect">Connect Keyboard (OTG)</button>
-  <div id="status">Hardware Offline</div>
+      <button id="btnConnect" class="btn-connect">CONNECT VIA OTG</button>
+      <div id="status">DISCONNECTED</div>
 
-  <div class="controls" id="controlPanel">
-    <div class="wheel-container">
-      <div id="colorWheel"></div>
+      <div class="controls-grid" id="controlGrid">
+        <div class="wheel-wrapper">
+          <div id="colorWheel"></div>
+        </div>
+
+        <div class="control-row">
+          <label>Lighting Effect Mode</label>
+          <select id="effectSelect">
+            <option value="1">1: Static Core</option>
+            <option value="2">2: Cyber Breath</option>
+            <option value="3">3: Swing</option>
+            <option value="4">4: Neon Spin</option>
+            <option value="5">5: Data Stream</option>
+            <option value="6">6: Bloom</option>
+            <option value="7">7: UDWawe</option>
+            <option value="8">8: Cross</option>
+            <option value="9">9: Rain</option>
+            <option value="10">10: Meteor</option>
+            <option value="11">11: TrigSpread</option>
+            <option value="12">12: TrigSpreadReverse</option>
+            <option value="13">13: TrigSingle</option>
+            <option value="14">14: Soduko</option>
+            <option value="15">15: Tide</option>
+            <option value="16">16: UserLight</option>
+            <option value="0">0: System Dark</option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <label>Brightness</label>
+          <input type="range" id="brightRange" min="0" max="4" value="4">
+        </div>
+
+        <div class="control-row">
+          <label>Speed</label>
+          <input type="range" id="speedRange" min="0" max="4" value="2">
+        </div>
+      </div>
     </div>
 
-    <div class="row">
-      <label>Lighting Mode</label>
-      <select id="effectSelect">
-        <option value="1">1: Static</option>
-        <option value="2">2: Breath</option>
-        <option value="3">3: Swing</option>
-        <option value="4">4: Spin</option>
-        <option value="5">5: Stream</option>
-        <option value="6">6: Bloom</option>
-        <option value="7">7: UDWawe</option>
-        <option value="8">8: Cross</option>
-        <option value="9">9: Rain</option>
-        <option value="10">10: Meteor</option>
-        <option value="11">11: TrigSpread</option>
-        <option value="12">12: TrigSpreadReverse</option>
-        <option value="13">13: TrigSingle</option>
-        <option value="14">14: Soduko</option>
-        <option value="15">15: Tide</option>
-        <option value="16">16: UserLight</option>
-        <option value="0">0: Light Off</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <label>Brightness</label>
-      <input type="range" id="brightRange" min="0" max="4" value="4">
-    </div>
-
-    <div class="row">
-      <label>Speed</label>
-      <input type="range" id="speedRange" min="0" max="4" value="2">
+    <div class="panel">
+      <div class="terminal" id="terminalLog">
+        <p class="log-line">&gt;&gt;&gt; ANDROID OTG READY</p>
+        <p class="log-line">&gt;&gt;&gt; PLUG KEYBOARD VIA OTG &amp; TAP CONNECT</p>
+      </div>
     </div>
   </div>
 
   <script>
+    const terminal = document.getElementById('terminalLog');
+    
+    function addLog(text, type = '') {
+      const p = document.createElement('p');
+      p.className = `log-line ${type}`;
+      p.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+      terminal.appendChild(p);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    let packetTimer = null;
     const btnConnect = document.getElementById('btnConnect');
-    const statusText = document.getElementById('status');
-    const controlPanel = document.getElementById('controlPanel');
     const effectSelect = document.getElementById('effectSelect');
     const brightRange = document.getElementById('brightRange');
     const speedRange = document.getElementById('speedRange');
 
-    let debounceTimer = null;
-
     const colorPicker = new iro.ColorPicker("#colorWheel", {
-      width: 200,
-      color: "#ff00ff",
-      borderWidth: 2,
-      borderColor: "rgba(255,255,255,0.15)",
+      width: 150,
+      color: "#00f3ff",
       layout: [{ component: iro.ui.Wheel }]
     });
 
@@ -224,62 +260,33 @@
       return [Math.floor(h * 255), Math.floor(s * 255), Math.floor(v * 255)];
     }
 
-    function pushToAndroid() {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
+    function autoPush() {
+      if (packetTimer) clearTimeout(packetTimer);
+      packetTimer = setTimeout(() => {
         const mode = parseInt(effectSelect.value, 10);
         const br = parseInt(brightRange.value, 10);
         const sp = parseInt(speedRange.value, 10);
         const [h, s, v] = getHardwareHSV(colorPicker.color.hexString);
 
-        // Hardware command structure: opcode 11
-        const lightConfig = [1, 0, mode, br, sp, 1, 1, 0, h, s, v];
-        const payload = [11, lightConfig.length, 0, 0, ...lightConfig];
-        const cmd = [0, 6, ...payload];
-        
-        // Build 65-byte hex string
-        const buffer = new Uint8Array(65);
-        cmd.forEach((val, i) => { if (i < 65) buffer[i] = val; });
-
-        let hex = '';
-        buffer.forEach(b => { hex += b.toString(16).padStart(2, '0'); });
-
-        if (window.AndroidBridge && window.AndroidBridge.sendRawReport) {
-          window.AndroidBridge.sendRawReport(hex);
+        if (window.AndroidBridge && window.AndroidBridge.sendPacket) {
+          window.AndroidBridge.sendPacket(mode, br, sp, h, s, v);
         }
-      }, 35);
+      }, 40);
     }
 
-    colorPicker.on('color:change', pushToAndroid);
-    effectSelect.addEventListener('change', pushToAndroid);
-    brightRange.addEventListener('input', pushToAndroid);
-    speedRange.addEventListener('input', pushToAndroid);
+    colorPicker.on('color:change', autoPush);
+    effectSelect.addEventListener('change', autoPush);
+    brightRange.addEventListener('input', autoPush);
+    speedRange.addEventListener('input', autoPush);
 
     btnConnect.addEventListener('click', () => {
-      statusText.textContent = "Scanning for USB OTG...";
-      statusText.style.color = '#ffaa00';
-      if (window.AndroidBridge && window.AndroidBridge.requestDevice) {
-        window.AndroidBridge.requestDevice();
+      if (window.AndroidBridge && window.AndroidBridge.initialize) {
+        addLog("Initiating USB OTG Handshake...", "glitch");
+        window.AndroidBridge.initialize();
       } else {
-        statusText.textContent = "AndroidBridge not found";
-        statusText.style.color = '#ef4444';
+        addLog("Error: AndroidBridge not detected", "glitch");
       }
     });
-
-    // Called from Java to update diagnostic info live
-    window.updateStatus = function(msg) {
-      statusText.textContent = msg;
-      statusText.style.color = '#ffaa00';
-    };
-
-    // Called from Java once permissions pass
-    window.onUsbConnected = function() {
-      btnConnect.style.display = 'none';
-      controlPanel.classList.add('active');
-      statusText.textContent = "HARDWARE LINKED: ACTIVE";
-      statusText.style.color = 'var(--neon-cyan)';
-      pushToAndroid();
-    };
   </script>
 </body>
 </html>
